@@ -4,7 +4,7 @@
 
 ## 安装
 
-1. 从 [GitHub Releases](https://github.com/ksr-v/xb-qrcode-extend/releases) 下载 `qrcodeextend-1.0.5.zip`。
+1. 从 [GitHub Releases](https://github.com/ksr-v/xb-qrcode-extend/releases) 下载 `qrcodeextend-1.0.6.zip`。
 2. 登录 Xboard 后台，进入“插件管理”，上传 ZIP 并安装“QRCode Extend”。安装钩子会校验 Xboard 核心文件版本、备份原文件、部署随包提供的核心集成、修补受支持的 Admin bundle、清理 Laravel 缓存并启用插件。
 3. 刷新后台，在“用户管理”的用户行“操作”菜单中使用“生成订阅二维码”。
 
@@ -27,7 +27,15 @@ su -s /bin/sh www -c 'touch /www/wwwroot/example.com/public/assets/admin/assets/
 
 安装前会检查全部核心文件，只接受受支持的原版文件或插件已部署的精确版本。遇到未知或已自定义修改的文件时会停止，不会强制覆盖。原始核心文件备份保存在站点 `storage/qrcodeextend/backups/` 目录，不位于公开目录。
 
-从插件管理卸载插件时，会尝试恢复已验证的 Admin bundle 和核心文件备份。如果文件在安装后又被其他更新修改，恢复操作会拒绝覆盖。
+如需通过命令恢复 Admin JS 桥接，请先 SSH 登录服务器并进入 Xboard 网站根目录，执行：
+
+```bash
+php artisan qrcodeextend:restore
+```
+
+命令会校验当前 Admin bundle，并在安全条件满足时恢复原始 Admin JS；遇到无法识别的文件或版本变化时会拒绝覆盖并保留备份。该命令只恢复 Admin 桥接，不会卸载插件或恢复核心 overlay 文件。
+
+如需完整移除插件并恢复 Admin bundle 与核心文件，请在 Xboard 后台进入“插件管理”，先禁用再卸载“QRCode Extend”。卸载钩子会校验备份后尝试恢复；如果文件在安装后又被其他更新修改，恢复操作会拒绝覆盖。保留 `storage/qrcodeextend/backups/` 中的备份以便人工检查。
 
 Admin bundle 补丁按明确版本和文件哈希锁定。升级 Xboard Admin 前，请先通过插件命令恢复桥接并确认恢复成功，再更新 Admin。
 

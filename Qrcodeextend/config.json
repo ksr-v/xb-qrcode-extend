@@ -1,0 +1,7 @@
+{
+  "name": "QRCode Extend",
+  "code": "qrcodeextend",
+  "version": "1.0.4",
+  "description": "Add QR code generation and automatically deploy the required Xboard core integration",
+  "author": "Local"
+}

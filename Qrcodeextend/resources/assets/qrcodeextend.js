@@ -154,6 +154,7 @@ const protocolTypes = types.filter(type => type !== 'auto' && type !== 'all');
 let rootElement = null;
 let escapeHandler = null;
 let activeState = null;
+let qrRenderId = 0;
 let toastTimer = null;
 
 function getLocale() {
@@ -212,7 +213,7 @@ function qrColor() {
   return colors[window.settings?.theme?.color] ?? colors.default;
 }
 
-function drawQr(canvas, logo, payload) {
+function drawQr(canvas, logo, payload, rendered) {
   const size = 140;
   const pixelRatio = 2;
   const qr = qrcodegen.QrCode.encodeText(payload, qrcodegen.QrCode.Ecc.MEDIUM);
@@ -234,7 +235,10 @@ function drawQr(canvas, logo, payload) {
     }
   }
 
-  if (!logo) return;
+  if (!logo) {
+    rendered();
+    return;
+  }
   const image = new Image();
   image.onload = () => {
     const iconSize = 40 * pixelRatio;
@@ -248,15 +252,32 @@ function drawQr(canvas, logo, payload) {
     const imageWidth = aspect >= 1 ? iconSize : iconSize * aspect;
     const imageHeight = aspect <= 1 ? iconSize : iconSize / aspect;
     context.drawImage(image, left + (iconSize - imageWidth) / 2, top + (iconSize - imageHeight) / 2, imageWidth, imageHeight);
+    rendered();
   };
+  image.onerror = rendered;
   image.src = logo;
 }
 
 function updateQr() {
   const canvas = rootElement?.querySelector('.qrcodeextend-canvas');
-  if (!canvas || !activeState) return;
+  const image = rootElement?.querySelector('.qrcodeextend-image');
+  if (!canvas || !image || !activeState) return;
+  const renderId = ++qrRenderId;
+  const payload = buildPayload();
+  const publish = () => {
+    if (renderId !== qrRenderId || !rootElement?.contains(image)) return;
+    try {
+      image.src = canvas.toDataURL('image/png');
+    } catch {
+      drawQr(canvas, '', payload, () => {
+        if (renderId === qrRenderId && rootElement?.contains(image)) {
+          image.src = canvas.toDataURL('image/png');
+        }
+      });
+    }
+  };
   try {
-    drawQr(canvas, window.settings?.logo || '', buildPayload());
+    drawQr(canvas, window.settings?.logo || '', payload, publish);
   } catch {
     toast(text('invalid'));
   }
@@ -292,6 +313,7 @@ function toggleType(type) {
 
 function close() {
   if (!rootElement) return;
+  qrRenderId++;
   const closingRoot = rootElement;
   closingRoot.classList.add('qrcodeextend-closing');
   window.setTimeout(() => closingRoot.remove(), 180);
@@ -326,7 +348,10 @@ function open(user) {
     <section class="qrcodeextend-dialog" role="dialog" aria-modal="true" aria-label="${text('qr')}">
       <div class="qrcodeextend-selector-label">${text('choose')}</div>
       <div class="qrcodeextend-protocols"></div>
-      <div class="qrcodeextend-code-frame"><canvas class="qrcodeextend-canvas" role="img" aria-label="${text('qr')}"></canvas></div>
+      <div class="qrcodeextend-code-frame">
+        <img class="qrcodeextend-image" alt="${text('qr')}" width="140" height="140" draggable="false" style="display:block;-webkit-touch-callout:default;user-select:auto">
+        <canvas class="qrcodeextend-canvas" aria-hidden="true" style="display:none"></canvas>
+      </div>
       <div class="qrcodeextend-hint">${text('hint')}</div>
     </section>`;
   const dialog = rootElement.querySelector('.qrcodeextend-dialog');

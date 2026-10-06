@@ -1,6 +1,6 @@
 # QRCode Extend
 
-Adds a locally generated subscription QR-code action to Xboard's Admin user menu. Version 1.1.0 follows Xboard's native lifecycle and owns only one delimited fragment in the Admin bundle.
+Adds a locally generated subscription QR-code action to Xboard's Admin user menu. Version 1.2.0 follows Xboard's native lifecycle and renders the final QR as a PNG image so mobile users can long-press it to save.
 
 ## Lifecycle
 

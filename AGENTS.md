@@ -2,7 +2,7 @@
 
 ## Project
 
-This repository publishes the standalone Xboard plugin `qrcodeextend`. Current release target: `v1.1.0`.
+This repository publishes the standalone Xboard plugin `qrcodeextend`. Current release target: `v1.2.0`.
 
 ## Architecture
 
@@ -23,6 +23,6 @@ This repository publishes the standalone Xboard plugin `qrcodeextend`. Current r
 
 Run focused PHPUnit, PHP/JS syntax checks, `git diff --check`, ZIP content/permission checks, native lifecycle tests, and both SmartExpiry orderings.
 
-The v1.1.0 candidate passed 10 tests / 28 assertions, native install-enable-disable-reenable-uninstall, exact Admin hash restoration, and real SmartExpiry `S→Q→Q⁻¹` plus `Q→S→Q⁻¹` tests.
+The v1.2.0 candidate passed 10 tests / 28 assertions, QR PNG image-output checks, PHP/JS syntax checks, and Linux ZIP extraction checks. The underlying native lifecycle, exact Admin hash restoration, and real SmartExpiry coexistence were validated for the 1.1 architecture retained by this release.
 
 Releases are immutable. Keep config version, README filename, ZIP, tag, and Release title aligned. ZIP must contain an explicit `Qrcodeextend/` root and no credentials or private environment data.

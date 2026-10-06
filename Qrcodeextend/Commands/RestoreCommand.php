@@ -9,7 +9,7 @@ use Throwable;
 class RestoreCommand extends Command
 {
     protected $signature = 'qrcodeextend:restore';
-    protected $description = 'Safely restore the verified original Admin bundle';
+    protected $description = 'Safely remove only the owned qrcodeextend Admin bridge fragment';
 
     public function handle(AdminBundlePatcher $patcher): int
     {

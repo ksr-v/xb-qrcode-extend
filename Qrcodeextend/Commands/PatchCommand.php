@@ -9,7 +9,7 @@ use Throwable;
 class PatchCommand extends Command
 {
     protected $signature = 'qrcodeextend:patch';
-    protected $description = 'Apply the version-locked qrcodeextend Admin bridge';
+    protected $description = 'Insert or verify the owned qrcodeextend Admin bridge fragment';
 
     public function handle(AdminBundlePatcher $patcher): int
     {

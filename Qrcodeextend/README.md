@@ -1,44 +1,63 @@
-# Xboard 二维码扩展
+# QRCode Extend
 
-为 Xboard 后台用户管理增加“生成订阅二维码”操作。二维码在浏览器本地生成，使用当前用户已有的订阅地址，不保存或上传订阅内容。
+Adds a locally generated subscription QR-code action to Xboard's Admin user menu. Version 1.1.0 follows Xboard's native lifecycle and owns only one delimited fragment in the Admin bundle.
 
-## 安装
+## Lifecycle
 
-1. 从 [GitHub Releases](https://github.com/ksr-v/xb-qrcode-extend/releases) 下载 `qrcodeextend-1.0.6.zip`。
-2. 登录 Xboard 后台，进入“插件管理”，上传 ZIP 并安装“QRCode Extend”。安装钩子会校验 Xboard 核心文件版本、备份原文件、部署随包提供的核心集成、修补受支持的 Admin bundle、清理 Laravel 缓存并启用插件。
-3. 刷新后台，在“用户管理”的用户行“操作”菜单中使用“生成订阅二维码”。
+- `install()` and `boot()` call `ensureIntegration()`; repeated calls are idempotent.
+- `cleanup()` calls `removeOwnedChanges()` and deletes QRCode Extend's published/private files. Xboard invokes cleanup on disable and before uninstall, so no custom `uninstall()` lifecycle is required.
+- `update()` re-establishes the current owned bridge.
+- Re-enabling the plugin recreates the bridge.
 
-插件安装接口需要在后台选择并上传 ZIP。完成后不需要手动覆盖核心文件，也不需要运行 Artisan 命令。安装钩子会尝试重载 Octane；如果主机不支持自动重载，请在控制面板重启该站点的 Octane 服务。
+The bridge lazily loads `/plugins/qrcodeextend/qrcodeextend.js` and `.css` when the QR action is selected. Consequently, QRCode Extend does not modify `resources/views/admin.blade.php`, `AbstractPlugin`, `PluginManager`, or the Console Kernel.
 
-### 权限准备
+## Core-integration audit
 
-只有遇到 `Permission denied`，且错误指向 `public/assets/admin/assets/` 时，才需要检查该目录权限。补丁器需要在 Admin 静态资源目录创建临时文件并替换 bundle。请通过 SSH 连接服务器，以 root 身份或具备相应 sudo 权限的账号执行以下示例：
+Earlier releases changed four upstream areas:
 
-```bash
-cd /www/wwwroot/example.com
-chown www:www public/assets/admin/assets
-chmod 755 public/assets/admin/assets
-su -s /bin/sh www -c 'touch /www/wwwroot/example.com/public/assets/admin/assets/.qrcodeextend-test && rm -f /www/wwwroot/example.com/public/assets/admin/assets/.qrcodeextend-test' && echo "权限验证通过：目录可写，可以安装 qrcodeextend 插件"
-```
+- `AbstractPlugin.php` and `PluginManager.php` added a custom `uninstall()` hook so the full Admin backup could be restored before deletion.
+- `PluginManager.php` also removed published assets and registered commands belonging to disabled plugins.
+- `Console/Kernel.php` invoked that extra command registration path.
+- `admin.blade.php` scanned every enabled plugin for Admin JS/CSS assets.
 
-示例使用站点根目录 `/www/wwwroot/example.com` 和 PHP/Octane 运行用户 `www`。请将 `example.com` 替换为实际站点目录，并按面板确认 PHP 运行用户；如果 PHP 用户不是 `www`，`chown` 和 `su` 中的用户/组也必须相应替换。不要将目录权限设置为 `777`。验证成功后回到插件管理重试安装。
+Those changes served safe restore, operator commands, asset cleanup, and Admin asset loading, but none is QR business logic. Version 1.1.0 removes all four core changes and the complete `CoreOverlayDeployer`/`resources/overlay` mechanism. Native `disable() → cleanup()` provides the required reversible lifecycle; the remaining bundle bridge owns its loader.
 
-## 安全与恢复
+## Ownership and coexistence
 
-安装前会检查全部核心文件，只接受受支持的原版文件或插件已部署的精确版本。遇到未知或已自定义修改的文件时会停止，不会强制覆盖。原始核心文件备份保存在站点 `storage/qrcodeextend/backups/` 目录，不位于公开目录。
+The injected block is bounded by exact `qrcodeextend:start:v3` and `qrcodeextend:end:v3` markers. Apply and removal run under the shared `storage/framework/xboard-admin-patch.lock` exclusive lock for their complete read → validate → transform → atomic-write → verify transaction.
 
-如需通过命令恢复 Admin JS 桥接，请先 SSH 登录服务器并进入 Xboard 网站根目录，执行：
+Rules:
 
-```bash
+- zero markers means not installed;
+- one complete, byte-exact block means installed;
+- partial, duplicate, moved, or edited markers fail closed;
+- exactly one known Admin action anchor is required;
+- removal deletes only the exact owned block and never restores the entire bundle from backup;
+- content before and after the owned block—including SmartExpiry markers and transforms—is preserved byte-for-byte.
+
+The supported build is detected through `public/assets/admin/manifest.json`, which must select `assets/index-CEIYH7i8.js`. The unique anchor is then checked in the current bundle. A clean full-file SHA is deliberately not required because other plugins may have already made legitimate changes.
+
+## Commands
+
+While the plugin is enabled:
+
+```text
+php artisan qrcodeextend:status
+php artisan qrcodeextend:patch
 php artisan qrcodeextend:restore
 ```
 
-命令会校验当前 Admin bundle，并在安全条件满足时恢复原始 Admin JS；遇到无法识别的文件或版本变化时会拒绝覆盖并保留备份。该命令只恢复 Admin 桥接，不会卸载插件或恢复核心 overlay 文件。
+`restore` is retained as an operator-friendly name but removes only QRCode Extend's owned fragment. Backups under `storage/qrcodeextend/backups/`, if present from older releases, are available for diagnostics and manual disaster recovery until the next disable/uninstall cleanup removes QRCode Extend's private storage.
 
-如需完整移除插件并恢复 Admin bundle 与核心文件，请在 Xboard 后台进入“插件管理”，先禁用再卸载“QRCode Extend”。卸载钩子会校验备份后尝试恢复；如果文件在安装后又被其他更新修改，恢复操作会拒绝覆盖。保留 `storage/qrcodeextend/backups/` 中的备份以便人工检查。
+## Compatibility and limitations
 
-Admin bundle 补丁按明确版本和文件哈希锁定。升级 Xboard Admin 前，请先通过插件命令恢复桥接并确认恢复成功，再更新 Admin。
+- SmartExpiry-first and QRCodeExtend-first transformations are covered by unit fixtures; QRCode Extend cleanup preserves SmartExpiry content.
+- The Admin React source is not published with Xboard, so one minimal bundle bridge remains necessary.
+- A new Admin build with a different manifest entry or action anchor is rejected until reviewed.
+- Legacy unmarked QRCode Extend injections fail closed and require a deliberate migration/removal; they are never guessed at or fuzzily deleted.
+- QRCode Extend removes `public/plugins/qrcodeextend/` and `storage/qrcodeextend/` itself during cleanup, then republishes assets from its package on enable. The shared `storage/framework/xboard-admin-patch.lock` is deliberately retained because it belongs to every Admin patching plugin and contains no plugin data.
+- Shared locking, build detection, bridge diagnostics, Admin extension points, asset loading, and optional command registration are general runtime capabilities that should eventually live in an `xb-extension-runtime`, not in QR business logic.
 
-## 数据处理
+## Data handling
 
-二维码内容来自所选用户已有的 `subscribe_url`，并附加与前台扫码订阅一致的 `types` 参数。二维码在本地生成，不持久化订阅数据，也不调用第三方二维码服务。
+The action uses the selected row's existing `subscribe_url`, applies the frontend-compatible `types` parameter, and renders the QR code locally with the vendored library. It does not persist subscription data or send it to a third party.

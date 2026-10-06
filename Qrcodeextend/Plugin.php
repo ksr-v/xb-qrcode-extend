@@ -3,49 +3,58 @@
 namespace Plugin\Qrcodeextend;
 
 use App\Services\Plugin\AbstractPlugin;
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\File;
 use Plugin\Qrcodeextend\Services\AdminBundlePatcher;
-use Plugin\Qrcodeextend\Services\CoreOverlayDeployer;
 
 class Plugin extends AbstractPlugin
 {
     public function install(): void
     {
-        $this->deployIntegration();
-        \App\Models\Plugin::query()
-            ->where('code', 'qrcodeextend')
-            ->update(['is_enabled' => true, 'updated_at' => now()]);
+        $this->ensureIntegration();
+    }
+
+    public function boot(): void
+    {
+        $this->ensureIntegration();
+    }
+
+    public function cleanup(): void
+    {
+        app(AdminBundlePatcher::class)->removeOwnedChanges();
+        $this->removeOwnedFiles();
     }
 
     public function update(string $oldVersion, string $newVersion): void
     {
-        $this->deployIntegration();
+        $this->ensureIntegration();
     }
 
-    public function uninstall(): void
+    private function ensureIntegration(): void
     {
-        app(AdminBundlePatcher::class)->restore();
-        app(CoreOverlayDeployer::class)->restore();
+        $this->publishOwnedAssets();
+        app(AdminBundlePatcher::class)->patch();
     }
 
-    private function deployIntegration(): void
+    private function publishOwnedAssets(): void
     {
-        $deployer = app(CoreOverlayDeployer::class);
-        $snapshot = $deployer->deploy();
+        $source = $this->basePath . '/resources/assets';
+        $target = public_path('plugins/qrcodeextend');
+        File::ensureDirectoryExists($target);
+        if (!File::copyDirectory($source, $target)) {
+            throw new \RuntimeException('Could not publish QRCode Extend assets.');
+        }
+    }
 
-        try {
-            app(AdminBundlePatcher::class)->patch();
-        } catch (\Throwable $exception) {
-            $deployer->rollback($snapshot);
-            throw $exception;
+    private function removeOwnedFiles(): void
+    {
+        $published = public_path('plugins/qrcodeextend');
+        if (File::isDirectory($published) && !File::deleteDirectory($published)) {
+            throw new \RuntimeException('Could not remove published QRCode Extend assets.');
         }
 
-        try {
-            Artisan::call('optimize:clear');
-            Artisan::call('octane:reload');
-        } catch (\Throwable $exception) {
-            Log::warning('QRCode Extend could not reload Octane automatically: ' . $exception->getMessage());
+        $privateStorage = storage_path('qrcodeextend');
+        if (File::isDirectory($privateStorage) && !File::deleteDirectory($privateStorage)) {
+            throw new \RuntimeException('Could not remove private QRCode Extend storage.');
         }
     }
 }

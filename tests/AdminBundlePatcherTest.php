@@ -37,7 +37,7 @@ class AdminBundlePatcherTest extends TestCase
 
         $patcher->patch();
         self::assertStringContainsString('smart-expiry-edit-v7', $this->readBundle());
-        self::assertStringContainsString('/*qrcodeextend:start:v3*/', $this->readBundle());
+        self::assertStringContainsString('/*qrcodeextend:start:v5*/', $this->readBundle());
 
         $patcher->removeOwnedChanges();
         self::assertSame($smart, $this->readBundle());
@@ -81,6 +81,36 @@ class AdminBundlePatcherTest extends TestCase
         $this->patcher()->patch();
     }
 
+    public function testOwnedV3BridgeUpgradesExactlyAndPreservesForeignChanges(): void
+    {
+        $reflection = new ReflectionClass(AdminBundlePatcher::class);
+        $v3 = $reflection->getMethod('ownedBlockV3')->invoke($this->patcher());
+        $original = '/*smart-expiry-edit-v7*/;' . $v3 . $this->anchor() . ';/*smart-expiry-create-v7*/';
+        $this->writeBundle($original);
+
+        $this->patcher()->patch();
+        self::assertStringContainsString('/*qrcodeextend:start:v5*/', $this->readBundle());
+        self::assertStringNotContainsString('/*qrcodeextend:start:v3*/', $this->readBundle());
+        self::assertStringContainsString('qrcodeextend.js?v=1.3.1', $this->readBundle());
+        $this->patcher()->removeOwnedChanges();
+        self::assertSame('/*smart-expiry-edit-v7*/;' . $this->anchor() . ';/*smart-expiry-create-v7*/', $this->readBundle());
+    }
+
+    public function testOwnedV4BridgeUpgradesExactlyAndPreservesForeignChanges(): void
+    {
+        $reflection = new ReflectionClass(AdminBundlePatcher::class);
+        $v4 = $reflection->getMethod('ownedBlockV4')->invoke($this->patcher());
+        $original = '/*smart-expiry-edit-v7*/;' . $v4 . $this->anchor() . ';/*smart-expiry-create-v7*/';
+        $this->writeBundle($original);
+
+        $this->patcher()->patch();
+        self::assertStringContainsString('/*qrcodeextend:start:v5*/', $this->readBundle());
+        self::assertStringNotContainsString('/*qrcodeextend:start:v4*/', $this->readBundle());
+        self::assertStringContainsString('qrcodeextend.js?v=1.3.1', $this->readBundle());
+        $this->patcher()->removeOwnedChanges();
+        self::assertSame('/*smart-expiry-edit-v7*/;' . $this->anchor() . ';/*smart-expiry-create-v7*/', $this->readBundle());
+    }
+
     public function testMissingOrDuplicateAnchorStopsWithoutWriting(): void
     {
         foreach (['no anchor', $this->anchor() . $this->anchor()] as $contents) {
@@ -115,9 +145,9 @@ class AdminBundlePatcherTest extends TestCase
     public function testPartialAndDuplicateMarkersFailClosed(): void
     {
         foreach ([
-            '/*qrcodeextend:start:v3*/' . $this->anchor(),
-            '/*qrcodeextend:start:v3*//*qrcodeextend:end:v3*/'
-                . '/*qrcodeextend:start:v3*//*qrcodeextend:end:v3*/' . $this->anchor(),
+            '/*qrcodeextend:start:v5*/' . $this->anchor(),
+            '/*qrcodeextend:start:v5*//*qrcodeextend:end:v5*/'
+                . '/*qrcodeextend:start:v5*//*qrcodeextend:end:v5*/' . $this->anchor(),
         ] as $contents) {
             $this->writeBundle($contents);
             try {
@@ -193,7 +223,7 @@ class AdminBundlePatcherTest extends TestCase
         flock($lock, LOCK_UN);
         fclose($lock);
         self::assertSame(0, proc_close($process));
-        self::assertStringContainsString('/*qrcodeextend:start:v3*/', $this->readBundle());
+        self::assertStringContainsString('/*qrcodeextend:start:v5*/', $this->readBundle());
     }
 
     private function anchor(): string

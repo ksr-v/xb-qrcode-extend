@@ -1,6 +1,6 @@
 # Agent 交接说明
 
-本仓库发布独立 Xboard 插件 `qrcodeextend`，当前发布目标为 `v1.2.0`。
+本仓库发布独立 Xboard 插件 `qrcodeextend`，当前发布目标为 `v1.3.1`。
 
 ## 架构
 
@@ -19,6 +19,6 @@
 
 ## 验证与发布
 
-发布前执行 PHPUnit、PHP/JS 语法检查、ZIP 内容和 Linux 权限检查、原生生命周期测试，以及 SmartExpiry 两种安装顺序测试。v1.2.0 候选已通过 10 项测试、28 个断言、PNG 图片输出检查和 Linux 解包检查；本版本沿用的 1.1 架构此前已通过完整启停卸载和真实 SmartExpiry 共存验证。
+发布前执行 PHPUnit、PHP/JS 语法检查、ZIP 内容和 Linux 权限检查、原生生命周期测试，以及 SmartExpiry 两种安装顺序测试。v1.3.1 将保存链接改为醒目的触屏按钮，更新资源缓存版本，并精确迁移 v3/v4 自有桥接到 v5，发布前必须覆盖这些路径。
 
 配置版本、README 文件名、ZIP、Git tag 和 Release 标题必须一致；ZIP 必须包含明确的 `Qrcodeextend/` 根目录，且不得包含凭据或私有环境数据。

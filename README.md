@@ -4,7 +4,7 @@
 
 ## 安装
 
-1. 从 [GitHub Releases](https://github.com/ksr-v/xb-qrcode-extend/releases) 下载 `qrcodeextend-1.2.0.zip`。
+1. 从 [GitHub Releases](https://github.com/ksr-v/xb-qrcode-extend/releases) 下载 `qrcodeextend-1.3.1.zip`。
 2. 在 Xboard 后台“插件管理”中上传 ZIP、安装并启用 **QRCode Extend**。
 3. 刷新后台，在用户管理的操作菜单中使用“生成订阅二维码”。
 
@@ -12,7 +12,7 @@
 
 ## 安全与兼容
 
-- 只向受支持的 Admin bundle 唯一锚点插入带 `qrcodeextend:start:v3` / `end:v3` 标记的最小桥接。
+- 只向受支持的 Admin bundle 唯一锚点插入带 `qrcodeextend:start:v5` / `end:v5` 标记的最小桥接；旧 v3/v4 自有桥接可精确升级。
 - patch 和清理的完整事务使用共享锁 `storage/framework/xboard-admin-patch.lock`。
 - 禁用或卸载只删除 QRCodeExtend 自己的片段，SmartExpiry 等其他插件的修改保持不变。
 - 重复启用不会重复注入；禁用会移除桥接与自身资源；重新启用会重新发布资源并恢复桥接。
@@ -37,6 +37,6 @@ php artisan qrcodeextend:restore
 
 二维码内容来自所选用户已有的 `subscribe_url`，并附加与前台一致的 `types` 参数。二维码由随包提供的本地库生成，不调用第三方二维码服务。
 
-二维码最终输出为 PNG 图片；手机端可以长按二维码使用浏览器或系统提供的“保存图片”操作。
+二维码最终输出为 `blob:` PNG 图片，手机端可长按调用浏览器图片菜单；弹窗同时提供“Save QR image”下载链接作为可靠兜底。
 
 更详细的生命周期、ownership 规则和已知限制参见 [插件 README](Qrcodeextend/README.md)。

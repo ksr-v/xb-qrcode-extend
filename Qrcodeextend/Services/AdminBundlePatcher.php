@@ -60,7 +60,7 @@ class AdminBundlePatcher
                 $patched = str_replace($this->ownedBlockV3(), $this->ownedBlock(), $current, $count);
                 if ($count !== 1) throw new RuntimeException("Expected one owned v3 bridge; found {$count}.");
                 $this->writeAndVerify($current, $patched, 'patched');
-                return 'Admin bridge upgraded from owned v3 to v4.';
+                return 'Admin bridge upgraded from owned v3 to v5.';
             }
             if ($check['state'] !== 'clean') throw new RuntimeException('Remove the unowned legacy qrcodeextend bridge before installing v1.1.0.');
             $patched = str_replace(self::ANCHOR, $this->ownedBlock() . self::ANCHOR, $current, $count);

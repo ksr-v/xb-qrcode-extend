@@ -2,9 +2,11 @@
 
 为 Xboard 后台用户管理增加“生成订阅二维码”操作。二维码完全在浏览器本地生成，不保存或上传订阅内容。
 
+1.3.2 修复已安装桥接仍等待共享锁的问题，并跳过完全相同资源的重复复制；缺失或损坏的资源仍会修复。保留现有 v5 桥接、二维码图片功能和资源缓存版本。
+
 ## 安装
 
-1. 从 [GitHub Releases](https://github.com/ksr-v/xb-qrcode-extend/releases) 下载 `qrcodeextend-1.3.1.zip`。
+1. 从 [GitHub Releases](https://github.com/ksr-v/xb-qrcode-extend/releases) 下载 `qrcodeextend-1.3.2.zip`。
 2. 在 Xboard 后台“插件管理”中上传 ZIP、安装并启用 **QRCode Extend**。
 3. 刷新后台，在用户管理的操作菜单中使用“生成订阅二维码”。
 
@@ -13,7 +15,7 @@
 ## 安全与兼容
 
 - 只向受支持的 Admin bundle 唯一锚点插入带 `qrcodeextend:start:v5` / `end:v5` 标记的最小桥接；旧 v3/v4 自有桥接可精确升级。
-- patch 和清理的完整事务使用共享锁 `storage/framework/xboard-admin-patch.lock`。
+- 完整验证通过的已安装桥接直接返回；首次安装、升级、异常状态复核、状态检查和清理仍使用共享锁 `storage/framework/xboard-admin-patch.lock`。
 - 禁用或卸载只删除 QRCodeExtend 自己的片段，SmartExpiry 等其他插件的修改保持不变。
 - 重复启用不会重复注入；禁用会移除桥接与自身资源；重新启用会重新发布资源并恢复桥接。
 - 卸载后删除 `public/plugins/qrcodeextend/`、`storage/qrcodeextend/` 和插件数据库记录，并精确恢复安装前 Admin bundle。

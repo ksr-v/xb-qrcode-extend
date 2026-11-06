@@ -2,7 +2,7 @@
 
 ## Project
 
-This repository publishes the standalone Xboard plugin `qrcodeextend`. Current release target: `v1.3.1`.
+This repository publishes the standalone Xboard plugin `qrcodeextend`. Current release target: `v1.3.2`.
 
 ## Architecture
 
@@ -23,6 +23,6 @@ This repository publishes the standalone Xboard plugin `qrcodeextend`. Current r
 
 Run focused PHPUnit, PHP/JS syntax checks, `git diff --check`, ZIP content/permission checks, native lifecycle tests, and both SmartExpiry orderings.
 
-The v1.3.1 candidate makes the save link a visible touch-friendly button, updates asset cache-busting, and migrates exact v3/v4 bridges to v5. Run the complete focused suite and mobile image-output checks before release.
+The v1.3.2 candidate lets a fully validated installed bridge return without waiting for the shared lock, and skips copying identical published assets. Installation, upgrades, invalid-state rechecks, status, and cleanup must retain their locks. Existing v5 markers, asset bytes, and the `1.3.1` asset cache query remain unchanged. Run the complete focused suite and mobile image-output checks before release.
 
 Releases are immutable. Keep config version, README filename, ZIP, tag, and Release title aligned. ZIP must contain an explicit `Qrcodeextend/` root and no credentials or private environment data.

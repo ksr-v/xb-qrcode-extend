@@ -1,0 +1,55 @@
+{
+  "archive_sha256": "0688c4f21d93a022db7433f4d11251c14c31bea42ac1065b2fe74b5f54271aef",
+  "canonical_line_endings": "LF",
+  "files": {
+    "Qrcodeextend/Commands/PatchCommand.php": {
+      "sha256": "445a3271dcdc6cb5c49a3ac69cbe9c71d751dee1743e8369f48fbb8fe2be4851",
+      "size": 634
+    },
+    "Qrcodeextend/Commands/RestoreCommand.php": {
+      "sha256": "145bf82c5d0023fcdf16652428c52dcd0dd7d238ed9f701a1b4190a8cf337828",
+      "size": 642
+    },
+    "Qrcodeextend/Commands/StatusCommand.php": {
+      "sha256": "7d8116585b7a4794e8288f333d5b53029fb99ca5dbca2fdfc45b78ba3b432518",
+      "size": 689
+    },
+    "Qrcodeextend/Plugin.php": {
+      "sha256": "ab99c90d1b259bd9bd0a8fd10105362cf7f49ca1b134fcc13c96064a480cb545",
+      "size": 3529
+    },
+    "Qrcodeextend/README.md": {
+      "sha256": "e3667e202458c1c21705c6f0866db3f20bec0bdb17ca6028e524946a8b6737d1",
+      "size": 5811
+    },
+    "Qrcodeextend/Services/AdminBundlePatcher.php": {
+      "sha256": "7b8f6f984f52c49e616ec4644baa948db516b13332eee41568fd2d07f1f38380",
+      "size": 13081
+    },
+    "Qrcodeextend/config.json": {
+      "sha256": "64eeac693a8e4e8223fe677c210956de3d26f204485e03f8331d7c4600fcf20a",
+      "size": 197
+    },
+    "Qrcodeextend/resources/assets/qrcodeextend.css": {
+      "sha256": "7f1a7cc3d4c086dc37f4ec9c8e8782e67bbf1d6f3a9415512c0fb563e2b428de",
+      "size": 4187
+    },
+    "Qrcodeextend/resources/assets/qrcodeextend.js": {
+      "sha256": "535e930509857a6c054cb4158b1085deef53ccf24fd9b6ddf66792f7461e901f",
+      "size": 13954
+    },
+    "Qrcodeextend/resources/assets/vendor/LICENSE.nayuki": {
+      "sha256": "f9f4bba35e6ee9161fa917a4cb9943c463be6a6d447c7ce370239769c699ad57",
+      "size": 1071
+    },
+    "Qrcodeextend/resources/assets/vendor/README.txt": {
+      "sha256": "f347f88ec2f668653c4cd5687785994e7b6a4f92309bed6d272fad19273462bc",
+      "size": 285
+    },
+    "Qrcodeextend/resources/assets/vendor/qrcodegen.js": {
+      "sha256": "782dfb84800af8ba2fd946a79a561f51e06612e3a0c2b8d493a45729f119447c",
+      "size": 45343
+    }
+  },
+  "version": "1.3.2"
+}

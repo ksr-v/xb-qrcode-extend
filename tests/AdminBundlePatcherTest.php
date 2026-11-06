@@ -226,6 +226,44 @@ class AdminBundlePatcherTest extends TestCase
         self::assertStringContainsString('/*qrcodeextend:start:v5*/', $this->readBundle());
     }
 
+    public function testInstalledBridgeDoesNotWaitForSharedLockOrWrite(): void
+    {
+        $this->writeBundle($this->anchor());
+        $this->patcher()->patch();
+        $before = $this->readBundle();
+        clearstatcache(true, $this->bundlePath());
+        $metadata = [filemtime($this->bundlePath()), filesize($this->bundlePath()), fileinode($this->bundlePath())];
+        $lock = fopen($this->root . '/' . AdminBundlePatcher::LOCK_FILE, 'c+');
+        self::assertIsResource($lock);
+        self::assertTrue(flock($lock, LOCK_EX));
+        $class = (new ReflectionClass(AdminBundlePatcher::class))->getFileName();
+        $helper = $this->root . '/installed-patch.php';
+        file_put_contents($helper, '<?php require ' . var_export($class, true)
+            . '; echo (new \\Plugin\\Qrcodeextend\\Services\\AdminBundlePatcher($argv[1]))->patch();');
+        $process = proc_open([PHP_BINARY, $helper, $this->root], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+        self::assertIsResource($process);
+        try {
+            $until = microtime(true) + 2;
+            do {
+                $status = proc_get_status($process);
+                if (!$status['running']) { break; }
+                usleep(10000);
+            } while (microtime(true) < $until);
+            self::assertFalse($status['running'], 'Installed bridge unnecessarily waited for the held shared lock.');
+            self::assertSame(0, $status['exitcode']);
+            self::assertSame('Admin bridge is already patched; no changes made.', stream_get_contents($pipes[1]));
+            self::assertSame('', stream_get_contents($pipes[2]));
+            self::assertSame($before, $this->readBundle());
+            clearstatcache(true, $this->bundlePath());
+            self::assertSame($metadata, [filemtime($this->bundlePath()), filesize($this->bundlePath()), fileinode($this->bundlePath())]);
+        } finally {
+            flock($lock, LOCK_UN);
+            fclose($lock);
+            foreach ($pipes as $pipe) { fclose($pipe); }
+            proc_close($process);
+        }
+    }
+
     private function anchor(): string
     {
         return (new ReflectionClass(AdminBundlePatcher::class))->getReflectionConstant('ANCHOR')->getValue();

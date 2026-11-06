@@ -1,0 +1,38 @@
+{
+  "result": "PASS",
+  "version": "1.3.2",
+  "base_commit": "9176c3da8b5084a4ad98d38c3471fb4f2543a4ec",
+  "runtime_files": 12,
+  "runtime_zip_sha256": "0688c4f21d93a022db7433f4d11251c14c31bea42ac1065b2fe74b5f54271aef",
+  "runtime_zip_bytes": 28881,
+  "explicit_plugin_root": true,
+  "permissions": {"files": "0644", "directories": "0755"},
+  "line_endings": "LF",
+  "repeat_package_identical": true,
+  "existing_v5_bridge_and_131_asset_query_preserved": true,
+  "assets_and_vendor_bytes_match_original_131_release": true,
+  "checks": {
+    "php_syntax_files": 8,
+    "js_syntax_files": 2,
+    "phpunit": {"version": "11.5.42", "tests": 13, "assertions": 45},
+    "independent_process_lock_scenarios": 10,
+    "native_smart_first_lifecycle_groups": 5,
+    "native_qr_first_lifecycle_groups": 5,
+    "existing_qr_image_output_checks": true,
+    "git_diff_check": true
+  },
+  "tooling": {
+    "php": "8.2.33 Windows CLI",
+    "phpunit_url": "https://phar.phpunit.de/phpunit-11.5.42.phar",
+    "phpunit_sha256": "894c651ee0fd38533649e92756022aa46a093d94c78652a4615aae23c846db60",
+    "checksum_source": "https://phar.phpunit.de/",
+    "checksum_verified_before_execution": true,
+    "packaging_command": "python scripts/package.py --timestamp 2026-11-07T00:00:00Z"
+  },
+  "scope": "Local copied assets, real PHP lock processes, native PluginManager and isolated SQLite fixtures only.",
+  "limitations": [
+    "No production service was accessed or changed by these checks.",
+    "No Linux PHP-FPM or PHP 8.3 acceptance is claimed.",
+    "Native version-update lifecycle exercised the 1.3.1 database record with current candidate classes; it does not replace a full production upgrade check."
+  ]
+}
